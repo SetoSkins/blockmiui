@@ -31,7 +31,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
-import cn.fkj233.ui.R
+import cn.fkj233.miui.R
 import cn.fkj233.ui.activity.data.DataBinding
 import cn.fkj233.ui.activity.data.Padding
 import cn.fkj233.ui.activity.dp2px
@@ -55,7 +55,7 @@ class TextV(val text: String? = null, private val textId: Int? = null, val textS
             view.gravity = if (isRtl(context)) Gravity.RIGHT else Gravity.LEFT
             textId?.let { view.setText(it) }
             if (textSize == null)
-                view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18.25f)
+                view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
             else
                 view.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
             colorInt?.let { view.setTextColor(colorInt) }

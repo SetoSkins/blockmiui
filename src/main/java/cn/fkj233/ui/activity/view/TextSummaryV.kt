@@ -30,7 +30,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
-import cn.fkj233.ui.R
+import cn.fkj233.miui.R
 import cn.fkj233.ui.activity.data.DataBinding
 import cn.fkj233.ui.activity.data.LayoutPair
 import cn.fkj233.ui.activity.dp2px
@@ -52,6 +52,7 @@ class TextSummaryV(private val text: String? = null, private val textId: Int? = 
     override fun create(context: Context, callBacks: (() -> Unit)?): View {
         return LinearContainerV(LinearContainerV.VERTICAL, arrayOf(
             LayoutPair(
+
                 TextView(context).also { view ->
                     view.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (text == null && textId == null) 15f else 18.25f)
                     view.gravity = if (isRtl(context)) Gravity.RIGHT else Gravity.LEFT
@@ -64,6 +65,7 @@ class TextSummaryV(private val text: String? = null, private val textId: Int? = 
                     textId?.let { it1 -> view.setText(it1) }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         view.paint.typeface = Typeface.create(null, 500,false)
+                        view.paint.typeface = Typeface.defaultFromStyle(Typeface.BOLD)
                     } else {
                         view.paint.typeface = Typeface.defaultFromStyle(Typeface.BOLD)
                     }

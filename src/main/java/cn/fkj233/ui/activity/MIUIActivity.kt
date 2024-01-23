@@ -24,31 +24,44 @@
 
 package cn.fkj233.ui.activity
 
+import android.animation.ObjectAnimator
+import java.util.Random
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.FragmentManager
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
+import android.view.Window
+import android.view.WindowManager
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.Keep
-import cn.fkj233.ui.R
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import cn.fkj233.miui.R
 import cn.fkj233.ui.activity.annotation.BMMainPage
 import cn.fkj233.ui.activity.annotation.BMMenuPage
 import cn.fkj233.ui.activity.annotation.BMPage
 import cn.fkj233.ui.activity.data.AsyncInit
 import cn.fkj233.ui.activity.data.BasePage
+import cn.fkj233.ui.activity.data.DataBinding
 import cn.fkj233.ui.activity.data.InitView
 import cn.fkj233.ui.activity.data.SafeSharedPreferences
 import cn.fkj233.ui.activity.fragment.MIUIFragment
 import cn.fkj233.ui.activity.view.BaseView
+import cn.fkj233.ui.activity.view.TitleTextV
 
 /**
  * @version: V1.0
@@ -60,6 +73,7 @@ import cn.fkj233.ui.activity.view.BaseView
  **/
 @Keep
 open class MIUIActivity : Activity() {
+
     private var callbacks: (() -> Unit)? = null
 
     private var thisName: ArrayList<String> = arrayListOf()
@@ -71,6 +85,7 @@ open class MIUIActivity : Activity() {
     private lateinit var initViewData: InitView.() -> Unit
 
     companion object {
+
         var safeSP: SafeSharedPreferences = SafeSharedPreferences()
 
         @SuppressLint("StaticFieldLeak")
@@ -113,6 +128,7 @@ open class MIUIActivity : Activity() {
     }
 
     private val titleView by lazy {
+
         TextView(activity).apply {
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).also {
                 it.gravity = Gravity.CENTER_VERTICAL
@@ -120,8 +136,25 @@ open class MIUIActivity : Activity() {
             gravity = if (isRtl(context)) Gravity.RIGHT else Gravity.LEFT
             setTextColor(getColor(R.color.whiteText))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f)
-            paint.typeface = Typeface.defaultFromStyle(Typeface.BOLD)
+
         }
+    }
+
+    private val titleText by lazy {
+        TextView(activity).apply {
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).also {
+                it.gravity = Gravity.CENTER_VERTICAL
+            }
+            gravity = if (isRtl(context)) Gravity.RIGHT else Gravity.LEFT
+            setTextColor(getColor(R.color.whiteText))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 22.5f)
+            alpha = 0.5f // 设置透明度为 0.5（半透明）
+        }
+    }
+
+    private fun TitleText(text: String? = null, textId: Int? = null,colorInt: Int? = null, colorId: Int? = null, dataBindingRecv: DataBinding.Binding.Recv? = null, onClickListener: (() -> Unit)? = null) {
+        val itemList: ArrayList<BaseView> = arrayListOf()
+        itemList.add(TitleTextV(text, textId,colorInt, colorId,dataBindingRecv, onClickListener))
     }
 
     private var frameLayoutId: Int = -1
@@ -147,7 +180,22 @@ open class MIUIActivity : Activity() {
     var isExit = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // 假设您正在操作的是当前的 Activity 实例
+        val yourActivity: Activity = this
+
+////// 获取当前窗口的属性
+//        val window: Window = yourActivity.window
+//
+////// 将窗口内容调整到适合屏幕的尺寸
+//        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+//
+//        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+//
+////// 设置导航栏背景色为透明
+//        window.navigationBarColor = Color.TRANSPARENT
+
         super.onCreate(savedInstanceState)
+
         context = this
         activity = this
         actionBar?.hide()
@@ -161,6 +209,7 @@ open class MIUIActivity : Activity() {
                 orientation = LinearLayout.HORIZONTAL
                 addView(backButton)
                 addView(titleView)
+                addView(titleText)
                 addView(menuButton)
             })
             addView(frameLayout)
@@ -206,6 +255,7 @@ open class MIUIActivity : Activity() {
                 return
             }
         }
+
     }
 
     private val pageInfo: HashMap<String, BasePage> = hashMapOf()
@@ -234,16 +284,39 @@ open class MIUIActivity : Activity() {
                 throw Exception("Page must be annotated with BMMainPage or BMMenuPage or BMPage")
             }
         }
+
     }
 
     @Deprecated("This method is obsolete")
     fun initView(iView: InitView.() -> Unit) {
         initViewData = iView
+
+    }
+    fun animateTitleView(titleView: View, isBack: Boolean = false, backButtonTranslationX: Float = 50f, titleButtonTranslationX: Float = 50f) {
+        // 创建 x 轴平移动画
+        val translationXValue = if (isBack) 0f else backButtonTranslationX
+        val translationX = ObjectAnimator.ofFloat(titleView, "translationX", translationXValue, 0f)
+        translationX.duration = 350 // 设置动画时长
+        translationX.interpolator = DecelerateInterpolator() // 设置动画插值器为减速插值器
+
+        // 创建透明度渐变动画
+        val alpha = ObjectAnimator.ofFloat(titleView, "alpha", 0f, 1f)
+        alpha.duration = 350 // 设置动画时长
+        alpha.interpolator = DecelerateInterpolator() // 设置动画插值器为减速插值器
+
+        // 启动动画
+        translationX.start()
+        alpha.start()
     }
 
     override fun setTitle(title: CharSequence?) {
         titleView.text = title
+//        val texts = mutableListOf("Tip：这么多功能里面，烟语觉得自己做的最完美的功能就是捐赠\uD83D\uDE0B", "Tip： 烟语开发的时候，曾因为乱加了一行代码导致状态栏上移，\n排查了一个下午的错误", "Tip： 这个App似乎有一个奇怪的页面？", "…", "Tip： Cemiuiler？真不熟", "Tip: 热知识：世界上功能最多的温控 Seto温控", "Tip: 烟语原本只是想做一个锁定均衡性能模式的功能，不知不觉中就开发了App", "Tip: 菜卡玩机是我们自己开发的论坛", "Tip: 关于模块里面的logo的颜色，是和知名软件粉色创可贴一样的颜色", "Tip： 冷知识：A12以下的系统\n因为没有莫奈取色,所以App的颜色是黑白的", "Tip: Seto出生在一个苹果发布了第一款手机的年代", "Tip: Sev到底是男生还是女生？", "Tip: Seto和烟语目前就读于山河大学三江市校区信息工程技术学院", "Tip: SetoSkins的名字来自于一个喜欢的作曲人和一张专辑", "Tip: Seto不精通C++、Kotlin、Shell\n这些都是烟语帮忙写的，Seto只负责写Tips", "Tip: 大\uD83D\uDC37\uD83D\uDC37是Mly，小\uD83D\uDC37\uD83D\uDC37是Shadow3", "Tip: Seto接触Java的契机，源于徕卡相机", "Tip: 想要尽快联系Seto？请去哔哩哔哩搜索SetoSKins并给他发私信！", "Tip: Seto有点强迫症，每个选项的上下布局都要纠结半天", "Tip: Seto曾经在Scene第一天更新Cpu温度的时候\n把Cpu温度干到150°以上,以至于让嘟嘟都发了动态", "Tip: 笨蛋Ray说他也要Tip，所以就有了这一条（）", "Tip: 笨蛋Ray是既危险又卡哇伊的食智力生物")
+//        val random = Random()
+//        val randomText = texts[random.nextInt(texts.size)] // 从列表中随机选择一个文本
+//        titleText.text = randomText // 替换标题文本
     }
+
 
     /**
      *  设置 SharedPreferences / Set SharedPreferences
@@ -267,6 +340,27 @@ open class MIUIActivity : Activity() {
      *  @param: key 注册的key / Register key
      */
     fun showFragment(key: String) {
+        title = dataList[key]?.title
+
+        // 添加标题动画
+        title = dataList[key]?.title
+
+        // 添加标题动画
+
+
+        val backButtonTranslationX = when {
+            key == "Main" -> 0f
+            key == "__menu__" -> -50f
+            else -> 50f
+        }
+        val titleButtonTranslationX = when {
+            key == "Main" -> 50f
+            key == "__menu__" -> -50f
+            else -> 50f
+        }
+        animateTitleView(titleView, isBack = key == "Main", backButtonTranslationX)
+        animateTitleView(backButton, isBack = key == "Main", backButtonTranslationX)
+
         if (this::initViewData.isInitialized) {
             title = dataList[key]?.title
             thisName.add(key)
@@ -274,13 +368,18 @@ open class MIUIActivity : Activity() {
             if (key != "Main" && fragmentManager.backStackEntryCount != 0) {
                 fragmentManager.beginTransaction().let {
                     if (key != "Menu") {
+
                         if (isRtl(activity)) it.setCustomAnimations(R.animator.slide_left_in, R.animator.slide_right_out, R.animator.slide_right_in, R.animator.slide_left_out)
                         else it.setCustomAnimations(R.animator.slide_right_in, R.animator.slide_left_out, R.animator.slide_left_in, R.animator.slide_right_out)
+
+
                     } else {
+
                         if (isRtl(activity)) it.setCustomAnimations(R.animator.slide_right_in, R.animator.slide_left_out, R.animator.slide_left_in, R.animator.slide_right_out)
                         else it.setCustomAnimations(R.animator.slide_left_in, R.animator.slide_right_out, R.animator.slide_right_in, R.animator.slide_left_out)
                     }
                 }.replace(frameLayoutId, frame).addToBackStack(key).commit()
+
                 backButton.visibility = View.VISIBLE
                 setMenuShow(dataList[key]?.hideMenu == false)
             } else {
@@ -333,6 +432,7 @@ open class MIUIActivity : Activity() {
     }
 
     fun setBackupShow(show: Boolean) {
+
         if (show) backButton.visibility = View.VISIBLE else backButton.visibility = View.GONE
     }
 
@@ -413,11 +513,15 @@ open class MIUIActivity : Activity() {
                 "Main" -> {
                     if (!viewData.mainShowBack) backButton.visibility = View.GONE
                     if (viewData.isMenu) menuButton.visibility = View.VISIBLE
+                    animateTitleView(titleView, true)  // 返回操作的动画
+                    animateTitleView(backButton, true)  // 返回操作的动画
                 }
 
                 "__main__" -> {
                     if (!pageInfo[name]!!.javaClass.getAnnotation(BMMainPage::class.java)!!.showBack) backButton.visibility = View.GONE
                     setMenuShow(pageInfo.containsKey("__menu__"))
+                    animateTitleView(titleView, true)  // 返回操作的动画
+                    animateTitleView(backButton, true)  // 返回操作的动画
                 }
 
                 else -> {
@@ -426,6 +530,8 @@ open class MIUIActivity : Activity() {
                     } else {
                         setMenuShow(!getPageHideMenu(pageInfo[name]!!))
                     }
+                    animateTitleView(titleView, true)  // 返回操作的动画
+                    animateTitleView(backButton, true)  // 返回操作的动画
                 }
             }
             title = if (this::initViewData.isInitialized) {
@@ -436,6 +542,7 @@ open class MIUIActivity : Activity() {
             fragmentManager.popBackStack()
         }
     }
+
 
     private fun ArrayList<*>.lastSize(): Int = this.size - 1
 

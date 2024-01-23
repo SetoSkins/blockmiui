@@ -5,6 +5,7 @@ package cn.fkj233.ui.activity.data
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.view.View
+import android.widget.ListView
 import android.widget.TextView
 import cn.fkj233.ui.activity.MIUIActivity
 import cn.fkj233.ui.activity.fragment.MIUIFragment
@@ -43,14 +44,36 @@ abstract class BasePage {
         itemList.add(ImageTextV(authorHead, authorName, authorTips, round, onClickListener, dataBindingRecv))
     }
 
-    fun Page(pageHead: Drawable, textSummaryV: TextSummaryV, round: Float = 0f, onClickListener: (() -> Unit)? = null, dataBindingRecv: DataBinding.Binding.Recv? = null) {
-        itemList.add(PageV(pageHead, textSummaryV, round, onClickListener, dataBindingRecv))
+    fun ImageView(drawable: Drawable, size: Float = 0f, width: Float = 0f,height: Float = 0f, position: Int = ImageV.POSITION_LEFT, round: Float = 0f, dataBindingRecv: DataBinding.Binding.Recv? = null, onClickListener: (() -> Unit)? = null) {
+        itemList.add(ImageV(drawable, size, width ,height ,position, round, dataBindingRecv, onClickListener))
+    }
+
+    fun ImageTextWithSwitchView(imageV: ImageV, textV: TextV, switchV: SwitchV, dataBindingRecv: DataBinding.Binding.Recv? = null) {
+        itemList.add(ImageTextWithSwitchV(imageV, textV, switchV, dataBindingRecv))
+    }
+
+    fun ImageTextSummaryWithSwitchView(imageV: ImageV, textSummaryV: TextSummaryV, switchV: SwitchV, dataBindingRecv: DataBinding.Binding.Recv? = null) {
+        itemList.add(ImageTextSummaryWithSwitchV(imageV, textSummaryV, switchV, dataBindingRecv))
+    }
+
+    fun List(block: (ListView.() -> Unit)? = null) {
+        itemList.add(ListV(block))
+    }
+
+    fun EditTextWithSpinner(text: String = "", hint: String = "",isSingleLine: Boolean = true, editTextWeight: Float = 1f,spinnerV: SpinnerV, dataBindingRecv: DataBinding.Binding.Recv? = null, editCallBacks: ((String) -> Unit)? = null) {
+        itemList.add(EditTextWithSpinnerV(text, hint, isSingleLine, editTextWeight,spinnerV, dataBindingRecv, editCallBacks))
+    }
+
+    fun Page(pageHead: Drawable, pageName: String? = null, pageNameId: Int? = null, round: Float = 0f, onClickListener: (() -> Unit)? = null, dataBindingRecv: DataBinding.Binding.Recv? = null) {
+        itemList.add(PageV(pageHead, pageName, pageNameId, round, onClickListener, dataBindingRecv))
     }
 
     fun Line() {
         itemList.add(LineV())
     }
-
+    fun Spacing() {
+        itemList.add(SpacingV())
+    }
     fun SeekBar(key: String, min: Int, max: Int, defaultProgress: Int, dataSend: DataBinding.Binding.Send? = null, dataBindingRecv: DataBinding.Binding.Recv? = null, callBacks: ((Int, TextView) -> Unit)? = null) {
         itemList.add(SeekBarV(key, min, max, defaultProgress, dataSend, dataBindingRecv, callBacks))
     }

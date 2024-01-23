@@ -5,7 +5,7 @@ plugins {
 
 android {
     compileSdk = 33
-    namespace = "cn.fkj233.ui"
+
     defaultConfig {
         minSdk = 26
     }
@@ -27,8 +27,11 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.majorVersion
     }
+    namespace = "cn.fkj233.miui"
 }
 
-dependencies {
-    implementation("androidx.annotation:annotation:1.6.0")
+dependencies{
+implementation ("androidx.appcompat:appcompat:1.6.1")
+
+    implementation("androidx.annotation:annotation:1.7.0")
 }
